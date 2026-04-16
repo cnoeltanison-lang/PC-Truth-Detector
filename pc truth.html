@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Detector 2026</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f9; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .label { font-weight: bold; color: #555; }
+        .value { color: #007bff; font-family: monospace; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>PC Information Panel</h2>
+    <div id="tech-details"></div>
+</div>
+
+<script>
+    async function getSystemInfo() {
+        const details = document.getElementById('tech-details');
+        let info = {};
+
+        // 1. Modern API: User Agent Client Hints (Highest accuracy in 2026)
+        if (navigator.userAgentData) {
+            const uaData = await navigator.userAgentData.getHighEntropyValues([
+                "architecture", "model", "platformVersion", "fullVersionList"
+            ]);
+            info.OS = `${uaData.platform} ${uaData.platformVersion}`;
+            info.Architecture = uaData.architecture;
+            info.Mobile = uaData.mobile ? "Yes" : "No";
+            info.Browser = uaData.brands.map(b => `${b.brand} ${b.version}`).join(', ');
+            info.BrandFull = JSON.stringify(uaData.fullVersionList);
+        } else {
+            // 2. Fallback: Old User Agent String
+            const ua = navigator.userAgent;
+            info.OS = ua.match(/\(([^)]+)\)/)[1]; // Basic OS detection
+            info.Browser = navigator.appName + " " + navigator.appVersion;
+            info.Mobile = /Mobi|Android/i.test(ua) ? "Yes" : "No";
+        }
+
+        // 3. Hardware/Screen Details
+        info.ScreenResolution = `${window.screen.width} x ${window.screen.height}`;
+        info.ColorDepth = window.screen.colorDepth;
+        info.DevicePixelRatio = window.devicePixelRatio;
+        info.LogicalProcessors = navigator.hardwareConcurrency || "Unknown";
+        info.DeviceMemory = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Unknown";
+        info.Language = navigator.language;
+        info.CookiesEnabled = navigator.cookieEnabled ? "Yes" : "No";
+
+        // Display Data
+        let html = '';
+        for (const [key, value] of Object.entries(info)) {
+            html += `<div class="info-row"><span class="label">${key}:</span> <span class="value">${value}</span></div>`;
+        }
+        details.innerHTML = html;
+        console.log(info);
+    }
+
+    getSystemInfo();
+</script>
+</body>
+</html>
